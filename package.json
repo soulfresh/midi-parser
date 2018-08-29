@@ -4,19 +4,40 @@
   "description": "Parse MIDI data into JSON and back again.",
   "main": "src/index.js",
   "scripts": {
-    "test": "test"
+    "test": "karma start"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/soulfresh/midi-parser.git"
   },
   "keywords": [
-    "MIDI"
+    "MIDI",
+    "midi parse"
   ],
   "author": "soulfresh",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/soulfresh/midi-parser/issues"
   },
-  "homepage": "https://github.com/soulfresh/midi-parser#readme"
+  "homepage": "https://github.com/soulfresh/midi-parser#readme",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.4",
+    "babel-plugin-module-resolver": "^3.1.1",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-stage-2": "^6.24.1",
+    "babel-preset-stage-3": "^6.24.1",
+    "jasmine": "^3.1.0",
+    "karma": "^2.0.0",
+    "karma-babel-preprocessor": "^7.0.0",
+    "karma-chrome-launcher": "^2.2.0",
+    "karma-jasmine": "^1.1.1",
+    "karma-jasmine-html-reporter": "^1.0.0",
+    "karma-sourcemap-loader": "^0.3.7",
+    "karma-webpack": "^3.0.0",
+    "webpack": "^4.16.1",
+    "webpack-cli": "^2.0.12"
+  }
 }
