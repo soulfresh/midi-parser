@@ -39,12 +39,13 @@ describe('MidiMessage', () => {
   });
 
   it('should be constructable with MIDI data.', () => {
-    midi = new MidiMessage(noteOn);
+    midi = new MidiMessage(noteOn, 207);
     expect(midi).toBeTruthy();
     expect(midi.type).toEqual('noteon');
     expect(midi.number).toEqual(noteOn[1]);
     expect(midi.value).toEqual(noteOn[2]);
     expect(midi.channel).toEqual(0);
+    expect(midi.timestamp).toEqual(207);
   });
 
   it('should be constructable with MIDI parameters.', () => {

@@ -86,7 +86,7 @@ export class MidiMessage {
 
   constructor(type, number, value, channel, timestamp) {
     // Midi Data Parameters
-    if (arguments.length > 1) {
+    if (arguments.length > 2) {
       this.reset(type, number, value, channel, timestamp);
     }
     // MidiMessage
@@ -99,7 +99,7 @@ export class MidiMessage {
         return false;
       }
 
-      this.fromMidiArray(type);
+      this.fromMidiArray(type, number);
     }
   }
 
@@ -302,8 +302,4 @@ export class MidiMessage {
 
     return mode;
   }
-}
-
-export default function(event){
-  return new MidiMessage(event);
 }
