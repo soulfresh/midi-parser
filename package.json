@@ -4,7 +4,11 @@
   "description": "Parse MIDI data into JSON and back again.",
   "main": "src/index.js",
   "scripts": {
-    "test": "karma start"
+    "build": "npm run clean && npm run transpile",
+    "test": "karma start",
+    "transpile": "babel -d lib src",
+    "clean": "rimraf lib/",
+    "prepublish": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -40,6 +44,7 @@
     "webpack-cli": "^2.0.12"
   },
   "dependencies": {
-    "karma": "^3.0.0"
+    "karma": "^3.0.0",
+    "rimraf": "^2.6.2"
   }
 }
