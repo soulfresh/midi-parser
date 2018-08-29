@@ -1,5 +1,5 @@
 {
-  "name": "midi-parser",
+  "name": "midi-message-parser",
   "version": "1.0.0",
   "description": "Parse MIDI data into JSON and back again.",
   "main": "src/index.js",
