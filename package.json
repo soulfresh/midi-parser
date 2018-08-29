@@ -1,0 +1,22 @@
+{
+  "name": "midi-parser",
+  "version": "1.0.0",
+  "description": "Parse MIDI data into JSON and back again.",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/soulfresh/midi-parser.git"
+  },
+  "keywords": [
+    "MIDI"
+  ],
+  "author": "soulfresh",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/soulfresh/midi-parser/issues"
+  },
+  "homepage": "https://github.com/soulfresh/midi-parser#readme"
+}
