@@ -1,6 +1,6 @@
 {
   "name": "midi-message-parser",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Parse MIDI data into JSON and back again.",
   "main": "lib/index.js",
   "scripts": {
@@ -34,17 +34,15 @@
     "babel-preset-stage-2": "^6.24.1",
     "babel-preset-stage-3": "^6.24.1",
     "jasmine": "^3.1.0",
+    "karma": "^3.0.0",
     "karma-babel-preprocessor": "^7.0.0",
     "karma-chrome-launcher": "^2.2.0",
     "karma-jasmine": "^1.1.1",
     "karma-jasmine-html-reporter": "^1.0.0",
     "karma-sourcemap-loader": "^0.3.7",
     "karma-webpack": "^3.0.0",
+    "rimraf": "^2.6.2",
     "webpack": "^4.16.1",
     "webpack-cli": "^2.0.12"
-  },
-  "dependencies": {
-    "karma": "^3.0.0",
-    "rimraf": "^2.6.2"
   }
 }
