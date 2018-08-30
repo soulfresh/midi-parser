@@ -1,7 +1,14 @@
 # midi-parser
 Parse MIDI data into JSON and back again.
 
-```
+This library is for you if:
+- You need to parse raw midi data into a more readable format.
+- You need to generate raw midi data to send to a device.
+- You need to manage midi device registration with a library of your choosing (ie. work directly with browser or node-midi APIs)
+- You need to easily parse all midi messages you receive.
+- You do not want to use an event based approach to midi parsing.
+
+```js
 import { MidiMessage } from 'midi-message-parser';
 
 const rawMidiData = [144, 60, 64]; // <-- imagine this came from a midi device.
@@ -36,3 +43,16 @@ const outputMidiData = message.toMidiArray();
 
 console.log(outputMidiData); // [144, 60, 64]
 ```
+
+## Some other midi libraries you may find useful:
+
+If this library doesn't fit the bill, try one of these...
+- node-midi (open midi device ports with node)
+- noble (open ble midi ports with node)
+- midi-help (react to specific midi events like 'noteOn', 'cc', etc.)
+- ble-midi-parser (get the raw midi data from a ble midi event which you can pass to this library)
+- webmidi (easily work with browser Web Midi API)
+- func-midi-parser (parse midi files)
+- midi-parser-js (another midi file parser)
+- midi-node (stream based midi file/event parser)
+- 
