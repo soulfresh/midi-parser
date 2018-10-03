@@ -16,6 +16,8 @@ export const MessageTypes = {
   UNKNOWN          : 'unknown'
 }
 
+const messageTypesList = Object.keys(MessageTypes).map((key) => MessageTypes[key]);
+
 // CC mode names
 export const CCModes = {
   ALL_SOUNDS_OFF      : 'allsoundsoff',
@@ -52,69 +54,198 @@ export const CCModeValues = {
   POLY_ON          : 127
 }
 
-let _validate = true;
-
 export class MidiMessage {
-  static get validate() {
-    return _validate;
-  }
-
   /*
-   * Set whether or not midi messages should be validated
-   * upon creation. This is on by default but should
-   * be turned of in the production code.
+   * There are 3 ways to create a MidiMessage instance:
    *
-   * ```
-   * // Turn off message validation in production:
-   * MidiMessage.validate(false)
-   * ```
+   * As parameters:
+   * - type = The midi message type. Must be one of the types
+   *          defined by `MessageTypes` or "UNKNOWN" will be used.
+   * - number = The note/cc number (if applicable).
+   * - value = The velocity/pressure/program/bend/etc
+   * - channel
+   * - timestamp - millisecond delay before message should be played.
+   *
+   * As an object:
+   * It can be either another MidiMessage instance or an object
+   * with similar properties.
+   *
+   * As an array:
+   * The parameters are expected to match the order defined
+   * by the constructor.
+   *
+   * Values will always be clamped to valid ranges with sensible
+   * defaults if not passed or invalid.
    */
-  static set validate(v) {
-    _validate = v;
-  }
-
-  validateArray(data) {
-    for (let i = 0; i < data.length; i++) {
-      if (isNaN(data[i])) {
-        console.warn(`MidiMessage input is not a valid MIDI data array: ${data}`);
-        return false;
-      }
-    }
-
-    return true;
-  }
-
   constructor(type, number, value, channel, timestamp) {
     // Midi Data Parameters
     if (arguments.length > 2) {
       this.reset(type, number, value, channel, timestamp);
     }
-    // MidiMessage
-    else if (type instanceof MidiMessage) {
-      this.copy(type);
-    }
     // Data Array
     else if (Array.isArray(type)) {
-      if (MidiMessage.validate && !this.validateArray(type)) {
-        return false;
-      }
-
       this.fromMidiArray(type, number);
+    }
+    // MidiMessage
+    else if (type instanceof Object) {
+      this.copy(type);
     }
   }
 
+  clampTo127(v) {
+    return Math.max(0, Math.min(127, v)) || 0;
+  }
+
+  isValidType(t) {
+    for (let i = 0; i < messageTypesList.length; i++) {
+      if (t === messageTypesList[i]) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  setType(t) {
+    if (this.isValidType(t)) {
+      this.type = t;
+    }
+    else {
+      // Special case because it's common to
+      // use 'cc' rather than 'controlchange'
+      if (t === 'cc') {
+        this.type = MessageTypes.CC;
+      }
+      else {
+        this.type = MessageTypes.UNKNOWN;
+      }
+    }
+  }
+
+  setTimestamp(t) {
+    this.timestamp = Number(t);
+    if (isNaN(this.timestamp)) this.timestamp = 0;
+  }
+
+  setChannel(c) {
+    this.channel = Number(c);
+    if (isNaN(this.channel) || this.channel < 0) this.channel = 0;
+    else if (this.channel > 16) this.channel = 16;
+  }
+
+  setValue(v) {
+    this.value = Number(v);
+    if (isNaN(this.value)) this.value = 0;
+
+    // If type is set, clamp value to the expected range.
+    if (this.type && this.type !== MessageTypes.UNKNOWN) {
+      switch(this.type) {
+        case MessageTypes.NOTE_ON:
+        case MessageTypes.NOTE_OFF:
+        case MessageTypes.KEY_PRESSURE:
+        case MessageTypes.CC:
+        case MessageTypes.PROGRAM_CHANGE:
+        case MessageTypes.CHANNEL_PRESSURE:
+        case MessageTypes.PITCH_BEND:
+          this.clampTo127(this.value);
+          break;
+      }
+    }
+  }
+
+  setNumber(n) {
+    this.number = Number(n);
+    if (isNaN(this.number)) this.number = 0;
+    this.clampTo127(this.value);
+  }
+
+  setVelocity(v) {
+    this.setValue(v);
+  }
+
+  setNote(n) {
+    this.setNumber(n);
+  }
+
+  setCC(c) {
+    this.setNumber(c);
+  }
+
+  setPressure(p) {
+    if (this.type === MessageTypes.KEY_PRESSURE) {
+      this.setValue(p);
+    }
+    else {
+      this.setNumber(p);
+    }
+  }
+
+  setProgram(p) {
+    this.setNumber(p);
+  }
+
+  setPitchbend(b) {
+    this.setNumber(b);
+  }
+
   reset(type, number, value = 0, channel = 0, timestamp = 0) {
-    this.timestamp = timestamp;
-    this.type         = type;
-    this.channel      = channel;
-    this.number       = number;
-    this.value        = value;
+    this.setTimestamp(timestamp);
+    this.setType(type);
+    this.setChannel(channel);
+    this.setNumber(number);
+    this.setValue(value);
 
     this.ccMode = type === MessageTypes.CC ?
       this.parseChannelModeMessage(number, value) :
       false;
 
+    this.disambiguate();
+
     return this;
+  }
+
+  /*
+   * Add midi message specific values to the message object
+   * to make it easier to use this object.
+   */
+  disambiguate() {
+    // In case we changed the type,
+    // clear out all of the custom properties.
+    delete this.note;
+    delete this.velocity;
+    delete this.pressure;
+    delete this.cc;
+    delete this.program;
+    delete this.pitchbend;
+
+    if (this.type) {
+      switch(this.type) {
+        case MessageTypes.NOTE_ON:
+        case MessageTypes.NOTE_OFF:
+          this.note = this.number;
+          this.velocity = this.value;
+          break;
+        case MessageTypes.KEY_PRESSURE:
+          this.note = this.number;
+          this.pressure = this.value;
+          this.velocity = this.value;
+          break;
+        case MessageTypes.CC:
+          this.cc = this.number;
+          break;
+        case MessageTypes.PROGRAM_CHANGE:
+          this.program = this.number;
+          break;
+        case MessageTypes.CHANNEL_PRESSURE:
+          this.pressure = this.number;
+          this.velocity = this.number;
+          break;
+        case MessageTypes.PITCH_BEND:
+          this.pitchbend = this.number;
+          this.velocity = this.number;
+          break;
+      }
+    }
   }
 
   copy(message) {
@@ -155,10 +286,15 @@ export class MidiMessage {
 
       case StatusBytes.NOTE_OFF:
         type = MessageTypes.NOTE_OFF;
+        value = 0;
         break;
 
       case StatusBytes.NOTE_ON:
-        type = MessageTypes.NOTE_ON;
+        if (value === 0) {
+          type = MessageTypes.NOTE_OFF;
+        } else {
+          type = MessageTypes.NOTE_ON;
+        }
         break;
 
       case StatusBytes.KEY_PRESSURE:

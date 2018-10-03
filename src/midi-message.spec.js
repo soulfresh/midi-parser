@@ -43,7 +43,9 @@ describe('MidiMessage', () => {
     expect(midi).toBeTruthy();
     expect(midi.type).toEqual('noteon');
     expect(midi.number).toEqual(noteOn[1]);
+    expect(midi.note).toEqual(noteOn[1]);
     expect(midi.value).toEqual(noteOn[2]);
+    expect(midi.velocity).toEqual(noteOn[2]);
     expect(midi.channel).toEqual(0);
     expect(midi.timestamp).toEqual(207);
   });
@@ -52,7 +54,9 @@ describe('MidiMessage', () => {
     midi = new MidiMessage('noteon', 60, 64);
     expect(midi.type).toEqual('noteon');
     expect(midi.number).toEqual(noteOn[1]);
+    expect(midi.note).toEqual(noteOn[1]);
     expect(midi.value).toEqual(noteOn[2]);
+    expect(midi.velocity).toEqual(noteOn[2]);
     expect(midi.channel).toEqual(0);
   });
 
@@ -61,7 +65,9 @@ describe('MidiMessage', () => {
     midi = new MidiMessage(original);
     expect(midi.type).toEqual('noteoff');
     expect(midi.number).toEqual(noteOff[1]);
+    expect(midi.note).toEqual(noteOff[1]);
     expect(midi.value).toEqual(noteOff[2]);
+    expect(midi.velocity).toEqual(noteOff[2]);
     expect(midi.channel).toEqual(0);
   });
 
@@ -71,15 +77,18 @@ describe('MidiMessage', () => {
     midi.copy(original);
     expect(midi.type).toEqual('noteoff');
     expect(midi.number).toEqual(noteOff[1]);
+    expect(midi.note).toEqual(noteOff[1]);
     expect(midi.value).toEqual(noteOff[2]);
+    expect(midi.velocity).toEqual(noteOff[2]);
     expect(midi.channel).toEqual(0);
   });
 
   it('should be able to reset its parameters.', () => {
     midi = new MidiMessage(noteOn);
     midi.reset('cc', 3, 1);
-    expect(midi.type).toEqual('cc');
+    expect(midi.type).toEqual('controlchange');
     expect(midi.number).toEqual(cc[1]);
+    expect(midi.cc).toEqual(cc[1]);
     expect(midi.value).toEqual(cc[2]);
     expect(midi.channel).toEqual(0);
   });
@@ -96,15 +105,26 @@ describe('MidiMessage', () => {
     midi.fromMidiArray(noteOn3);
     expect(midi.type).toEqual('noteon');
     expect(midi.number).toEqual(noteOn3[1]);
+    expect(midi.note).toEqual(noteOn3[1]);
     expect(midi.value).toEqual(noteOn3[2]);
+    expect(midi.velocity).toEqual(noteOn3[2]);
     expect(midi.channel).toEqual(2);
+  });
+
+  it('should parse 0 velocity note on messages as note off.', () => {
+    let n = noteOn3.slice();
+    n[2] = 0;
+    midi.fromMidiArray(n);
+    expect(midi.type).toEqual('noteoff');
   });
 
   it('should be able to parse note off.', () => {
     midi.fromMidiArray(noteOff3);
     expect(midi.type).toEqual('noteoff');
     expect(midi.number).toEqual(noteOff3[1]);
+    expect(midi.note).toEqual(noteOff3[1]);
     expect(midi.value).toEqual(noteOff3[2]);
+    expect(midi.velocity).toEqual(noteOff3[2]);
     expect(midi.channel).toEqual(2);
   });
 
@@ -112,7 +132,10 @@ describe('MidiMessage', () => {
     midi.fromMidiArray(keyPressure3);
     expect(midi.type).toEqual('keypressure');
     expect(midi.number).toEqual(keyPressure3[1]);
+    expect(midi.note).toEqual(keyPressure3[1]);
     expect(midi.value).toEqual(keyPressure3[2]);
+    expect(midi.velocity).toEqual(keyPressure3[2]);
+    expect(midi.pressure).toEqual(keyPressure3[2]);
     expect(midi.channel).toEqual(2);
   });
 
@@ -120,6 +143,7 @@ describe('MidiMessage', () => {
     midi.fromMidiArray(cc3);
     expect(midi.type).toEqual('controlchange');
     expect(midi.number).toEqual(cc3[1]);
+    expect(midi.cc).toEqual(cc3[1]);
     expect(midi.value).toEqual(cc3[2]);
     expect(midi.channel).toEqual(2);
   });
@@ -128,6 +152,8 @@ describe('MidiMessage', () => {
     midi.fromMidiArray(channelPressure3);
     expect(midi.type).toEqual('channelpressure');
     expect(midi.number).toEqual(channelPressure3[1]);
+    expect(midi.pressure).toEqual(channelPressure3[1]);
+    expect(midi.velocity).toEqual(channelPressure3[1]);
     expect(midi.value).toEqual(0);
     expect(midi.channel).toEqual(2);
   });
@@ -136,6 +162,8 @@ describe('MidiMessage', () => {
     midi.fromMidiArray(pitch3);
     expect(midi.type).toEqual('pitchbend');
     expect(midi.number).toEqual(pitchBendValue);
+    expect(midi.velocity).toEqual(pitchBendValue);
+    expect(midi.pitchbend).toEqual(pitchBendValue);
     expect(midi.value).toEqual(0);
     expect(midi.channel).toEqual(2);
   });
@@ -144,6 +172,7 @@ describe('MidiMessage', () => {
     midi.fromMidiArray(programChange3);
     expect(midi.type).toEqual('programchange');
     expect(midi.number).toEqual(programChange3[1]);
+    expect(midi.program).toEqual(programChange3[1]);
     expect(midi.value).toEqual(0);
     expect(midi.channel).toEqual(2);
   });
@@ -152,6 +181,7 @@ describe('MidiMessage', () => {
     midi.fromMidiArray(allSoundsOff3);
     expect(midi.type).toEqual('controlchange');
     expect(midi.number).toEqual(allSoundsOff3[1]);
+    expect(midi.cc).toEqual(allSoundsOff3[1]);
     expect(midi.value).toEqual(allSoundsOff3[2]);
     expect(midi.channel).toEqual(2);
     expect(midi.ccMode).toEqual('allsoundsoff');
@@ -161,6 +191,7 @@ describe('MidiMessage', () => {
     midi.fromMidiArray(resetAll3);
     expect(midi.type).toEqual('controlchange');
     expect(midi.number).toEqual(resetAll3[1]);
+    expect(midi.cc).toEqual(resetAll3[1]);
     expect(midi.value).toEqual(resetAll3[2]);
     expect(midi.channel).toEqual(2);
     expect(midi.ccMode).toEqual('resetallcontrollers');
@@ -170,6 +201,7 @@ describe('MidiMessage', () => {
     midi.fromMidiArray(localControllerOn3);
     expect(midi.type).toEqual('controlchange');
     expect(midi.number).toEqual(localControllerOn3[1]);
+    expect(midi.cc).toEqual(localControllerOn3[1]);
     expect(midi.value).toEqual(localControllerOn3[2]);
     expect(midi.channel).toEqual(2);
     expect(midi.ccMode).toEqual('localcontrolleron');
@@ -179,6 +211,7 @@ describe('MidiMessage', () => {
     midi.fromMidiArray(localControllerOff3);
     expect(midi.type).toEqual('controlchange');
     expect(midi.number).toEqual(localControllerOff3[1]);
+    expect(midi.cc).toEqual(localControllerOff3[1]);
     expect(midi.value).toEqual(localControllerOff3[2]);
     expect(midi.channel).toEqual(2);
     expect(midi.ccMode).toEqual('localcontrolleroff');
@@ -188,6 +221,7 @@ describe('MidiMessage', () => {
     midi.fromMidiArray(allNotesOff3);
     expect(midi.type).toEqual('controlchange');
     expect(midi.number).toEqual(allNotesOff3[1]);
+    expect(midi.cc).toEqual(allNotesOff3[1]);
     expect(midi.value).toEqual(allNotesOff3[2]);
     expect(midi.channel).toEqual(2);
     expect(midi.ccMode).toEqual('allnotesoff');
@@ -197,6 +231,7 @@ describe('MidiMessage', () => {
     midi.fromMidiArray(omniOff3);
     expect(midi.type).toEqual('controlchange');
     expect(midi.number).toEqual(omniOff3[1]);
+    expect(midi.cc).toEqual(omniOff3[1]);
     expect(midi.value).toEqual(omniOff3[2]);
     expect(midi.channel).toEqual(2);
     expect(midi.ccMode).toEqual('omnimodeoff');
@@ -206,6 +241,7 @@ describe('MidiMessage', () => {
     midi.fromMidiArray(omniOn3);
     expect(midi.type).toEqual('controlchange');
     expect(midi.number).toEqual(omniOn3[1]);
+    expect(midi.cc).toEqual(omniOn3[1]);
     expect(midi.value).toEqual(omniOn3[2]);
     expect(midi.channel).toEqual(2);
     expect(midi.ccMode).toEqual('omnimodeon');
@@ -215,6 +251,7 @@ describe('MidiMessage', () => {
     midi.fromMidiArray(polyOn3);
     expect(midi.type).toEqual('controlchange');
     expect(midi.number).toEqual(polyOn3[1]);
+    expect(midi.cc).toEqual(polyOn3[1]);
     expect(midi.value).toEqual(polyOn3[2]);
     expect(midi.channel).toEqual(2);
     expect(midi.ccMode).toEqual('polymodeon');
