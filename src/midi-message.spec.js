@@ -50,8 +50,44 @@ describe('MidiMessage', () => {
     expect(midi.timestamp).toEqual(207);
   });
 
+  it('should be constructable from a parameter array.', () => {
+    midi = new MidiMessage(['noteon', 40, 33, 7, 444]);
+    expect(midi).toBeTruthy();
+    expect(midi.type).toEqual('noteon');
+    expect(midi.number).toEqual(40);
+    expect(midi.note).toEqual(40);
+    expect(midi.value).toEqual(33);
+    expect(midi.velocity).toEqual(33);
+    expect(midi.channel).toEqual(7);
+    expect(midi.timestamp).toEqual(444);
+  });
+
+
   it('should be constructable with MIDI parameters.', () => {
     midi = new MidiMessage('noteon', 60, 64);
+    expect(midi.type).toEqual('noteon');
+    expect(midi.number).toEqual(noteOn[1]);
+    expect(midi.note).toEqual(noteOn[1]);
+    expect(midi.value).toEqual(noteOn[2]);
+    expect(midi.velocity).toEqual(noteOn[2]);
+    expect(midi.channel).toEqual(0);
+  });
+
+  it('should be constructable from a note number.', () => {
+    midi = new MidiMessage(78);
+    expect(midi).toBeTruthy();
+    expect(midi.type).toEqual('noteon');
+    expect(midi.number).toEqual(78);
+    expect(midi.note).toEqual(78);
+    expect(midi.value).toEqual(127);
+    expect(midi.velocity).toEqual(127);
+    expect(midi.channel).toEqual(0);
+    expect(midi.timestamp).toEqual(0);
+  });
+
+  it('should be constructable from raw midi data parameters.', () => {
+    midi = new MidiMessage(...noteOn, 300);
+    expect(midi).toBeTruthy();
     expect(midi.type).toEqual('noteon');
     expect(midi.number).toEqual(noteOn[1]);
     expect(midi.note).toEqual(noteOn[1]);

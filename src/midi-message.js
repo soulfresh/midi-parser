@@ -16,7 +16,9 @@ export const MessageTypes = {
   UNKNOWN          : 'unknown'
 }
 
-const messageTypesList = Object.keys(MessageTypes).map((key) => MessageTypes[key]);
+const messageTypesList = Object.keys(MessageTypes)
+  .map((key) => MessageTypes[key])
+  .filter((key) => key !== 'unknow');
 
 // CC mode names
 export const CCModes = {
@@ -56,9 +58,16 @@ export const CCModeValues = {
 
 export class MidiMessage {
   /*
-   * There are 3 ways to create a MidiMessage instance:
+   * There are a few ways to create a MidiMessage instance...
+   *
+   * As a note number:
+   * `new MidiMessage(34)`
+   *
+   * Creates a 'noteon' midi message with the velocity set to 127.
    *
    * As parameters:
+   * `new MidiMessage('noteon', 44, 120, 7, 1000)`
+   *
    * - type = The midi message type. Must be one of the types
    *          defined by `MessageTypes` or "UNKNOWN" will be used.
    * - number = The note/cc number (if applicable).
@@ -67,28 +76,54 @@ export class MidiMessage {
    * - timestamp - millisecond delay before message should be played.
    *
    * As an object:
+   * `new MidiMessage(oldMidiMessage)`
+   *
    * It can be either another MidiMessage instance or an object
    * with similar properties.
    *
    * As an array:
-   * The parameters are expected to match the order defined
-   * by the constructor.
+   * `new MidiMessage([144, 60, 64])`
    *
-   * Values will always be clamped to valid ranges with sensible
-   * defaults if not passed or invalid.
+   * The array data is expected to be raw midi data bytes as
+   * expected by `MidiMessage.fromMidiArray()`;
+   *
+   *
+   * However you pass the data, Values will always be clamped
+   * to valid ranges with sensible defaults. Invalid parameters
+   * will be replaced with the defaults as well.
    */
   constructor(type, number, value, channel, timestamp) {
-    // Midi Data Parameters
-    if (arguments.length > 2) {
-      this.reset(type, number, value, channel, timestamp);
-    }
     // Data Array
-    else if (Array.isArray(type)) {
-      this.fromMidiArray(type, number);
+    if (Array.isArray(type)) {
+      // If we passed a non-number string as the first value.
+      if (typeof(type[0]) === 'string' && isNaN(Number(type[0]))) {
+        this.reset(...type);
+      }
+      else {
+        this.fromMidiArray(type, number);
+      }
     }
     // MidiMessage
     else if (type instanceof Object) {
       this.copy(type);
+    }
+    // Midi Data Parameters
+    else {
+      // If we passed a number, rather than a string as the type,
+      if (!isNaN(Number(type))) {
+        // If we only passed one number,
+        // treat it as a note number that we wish to send a note on for.
+        if (arguments.length === 1) {
+          this.reset('noteon', type);
+        }
+        // Otherwise, treat it like a raw midi array passed as parameters.
+        else {
+          this.fromMidiArray([type, number, value], channel);
+        }
+      }
+      else {
+        this.reset(type, number, value, channel, timestamp);
+      }
     }
   }
 
@@ -135,7 +170,7 @@ export class MidiMessage {
 
   setValue(v) {
     this.value = Number(v);
-    if (isNaN(this.value)) this.value = 0;
+    if (isNaN(this.value)) this.value = 127;
 
     // If type is set, clamp value to the expected range.
     if (this.type && this.type !== MessageTypes.UNKNOWN) {
@@ -188,7 +223,7 @@ export class MidiMessage {
     this.setNumber(b);
   }
 
-  reset(type, number, value = 0, channel = 0, timestamp = 0) {
+  reset(type, number, value, channel, timestamp) {
     this.setTimestamp(timestamp);
     this.setType(type);
     this.setChannel(channel);
