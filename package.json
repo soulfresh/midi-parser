@@ -1,6 +1,6 @@
 {
   "name": "midi-message-parser",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Parse MIDI data into JSON and back again.",
   "main": "lib/index.js",
   "scripts": {
