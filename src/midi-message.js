@@ -283,13 +283,24 @@ export class MidiMessage {
     }
   }
 
-  copy(message) {
+  // TODO API like var other = message.duplicate(overrides)
+  duplicate(override) {
+    return new MidiMessage(
+      override.type      || this.type,
+      override.number    || this.number,
+      override.value     || this.value,
+      override.channel   || this.channel,
+      override.timestamp || this.timestamp
+    );
+  }
+
+  copy(other, override) {
     return this.reset(
-      message.type,
-      message.number,
-      message.value,
-      message.channel,
-      message.timestamp
+      override.type      || other.type,
+      override.number    || other.number,
+      override.value     || other.value,
+      override.channel   || other.channel,
+      override.timestamp || other.timestamp
     );
   }
 
